@@ -1,0 +1,1 @@
+web: java -jar target/hseapple-0.0.1-SNAPSHOT.jar

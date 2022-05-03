@@ -1,0 +1,239 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet id="user-role-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS user_role (
+            id SERIAL PRIMARY KEY,
+            role_user VARCHAR(50) NOT NULL
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="default-user-role-creation" author="dayana">
+        <sql>
+            INSERT INTO user_role (role_user) VALUES('STUDENT');
+            INSERT INTO user_role (role_user) VALUES('ASSIST');
+            INSERT INTO user_role (role_user) VALUES('TEACHER');
+        </sql>
+    </changeSet>
+    <changeSet id="user-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            commonname VARCHAR(225) NOT NULL,
+            email VARCHAR(225) NOT NULL,
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW()
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="course-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS course (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(50) NOT NULL,
+            description TEXT NULL
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="default-course-creation" author="dayana">
+        <sql>
+            INSERT INTO course (title, description) VALUES('НИС по IOS разработке 2 курс', 'Сосновский Григорий Михайлович');
+            INSERT INTO course (title, description) VALUES('НИС по IOS разработке 3 курс', 'Сосновский Григорий Михайлович');
+        </sql>
+    </changeSet>
+    <changeSet id="default-user-creation" author="dayana">
+        <sql>
+            INSERT INTO users (commonname, email) VALUES('Петров Миша Александрович', 'sdfg@gmail.com');
+            INSERT INTO users (commonname, email) VALUES('Иванов Петя Петрович', 'sdfg@gmail.ru');
+            INSERT INTO users (commonname, email) VALUES('Сосновский Григорий Михайлович', 'gmsosnovskiy@edu.hse.ru')
+        </sql>
+    </changeSet>
+    <changeSet id="user-course-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS user_course (
+            id SERIAL PRIMARY KEY,
+            userID INTEGER NOT NULL,
+            courseID INTEGER NOT NULL,
+            roleID SMALLINT NOT NULL,
+            FOREIGN KEY (roleID) REFERENCES user_role(id),
+            FOREIGN KEY (userID) REFERENCES users(id),
+            FOREIGN KEY (courseID) REFERENCES course(id)
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="default-user-course-creation" author="dayana">
+        <sql>
+            INSERT INTO user_course (userid, courseid, roleid) VALUES(3, 1, 3)
+        </sql>
+    </changeSet>
+    <changeSet id="user-profile-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS user_profile (
+            id SERIAL PRIMARY KEY,
+            userID INTEGER NOT NULL,
+            avatar TEXT NULL,
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP(0) WITHOUT TIME ZONE NULL,
+            FOREIGN KEY (userID) REFERENCES users(id)
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="default-user-profile-creation" author="dayana">
+        <sql>
+            INSERT INTO user_profile (userid) VALUES(3)
+        </sql>
+    </changeSet>
+    <changeSet id="user-request-course-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS user_request_course (
+            id SERIAL PRIMARY KEY,
+            userID INTEGER NOT NULL,
+            courseID INTEGER NOT NULL,
+            roleID INTEGER NOT NULL,
+            approved BOOLEAN DEFAULT FALSE NOT NULL,
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP(0) WITHOUT TIME ZONE NULL,
+            FOREIGN KEY (userID) REFERENCES users(id),
+            FOREIGN KEY (courseID) REFERENCES course(id),
+            FOREIGN KEY (roleID) REFERENCES user_role(id)
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="default-user-request-creation" author="dayana">
+        <sql>
+            INSERT INTO user_request_course (userid, courseid, roleid, approved) VALUES(3, 1, 3, true)
+        </sql>
+    </changeSet>
+    <changeSet id="task-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS task (
+            id SERIAL PRIMARY KEY,
+            courseID INTEGER NOT NULL,
+            form VARCHAR(50) NOT NULL,
+            title VARCHAR(150) NOT NULL,
+            description TEXT NULL,
+            task_content TEXT NOT NULL,
+            deadline TIMESTAMP NULL,
+            status BOOLEAN DEFAULT FALSE NOT NULL,
+            createdBy INTEGER NOT NULL,
+            updatedBy INTEGER,
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP(0) WITHOUT TIME ZONE NULL,
+            FOREIGN KEY (createdBy) REFERENCES users(id),
+            FOREIGN KEY (updatedBy) REFERENCES users(id),
+            FOREIGN KEY (courseID) REFERENCES course(id)
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="user-task-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS user_task (
+            id SERIAL PRIMARY KEY,
+            taskID INTEGER NOT NULL,
+            userID INTEGER NOT NULL,
+            answer TEXT NULL,
+            score SMALLINT NULL,
+            status BOOLEAN DEFAULT FALSE NOT NULL,
+            createdBy INTEGER NOT NULL,
+            updatedBy INTEGER,
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP(0) WITHOUT TIME ZONE NULL,
+            FOREIGN KEY (createdBy) REFERENCES users(id),
+            FOREIGN KEY (updatedBy) REFERENCES users(id),
+            FOREIGN KEY (taskID) REFERENCES task(id),
+            FOREIGN KEY (userID) REFERENCES users(id)
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="chat-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS chat (
+            id SERIAL PRIMARY KEY,
+            courseID INTEGER NOT NULL,
+            title VARCHAR(50) NOT NULL,
+            description TEXT NULL,
+            group_avatar TEXT NULL,
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW(),
+            FOREIGN KEY (courseID) REFERENCES course(id)
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="default-chat-creation" author="dayana">
+        <sql>
+            INSERT INTO chat (courseID, title, description, group_avatar) VALUES(1, 'Общее', 'Все участники', null);
+            INSERT INTO chat (courseID, title, description, group_avatar) VALUES(1, 'Важное', 'Все участники', null);
+            INSERT INTO chat (courseID, title, description, group_avatar) VALUES(1, 'Флудилка', 'Все участники', null);
+            INSERT INTO chat (courseID, title, description, group_avatar) VALUES(1, 'Преподы и ассистенты', 'Прееподы и ассисты', null);
+            INSERT INTO chat (courseID, title, description, group_avatar) VALUES(2, 'Общее', 'Все участники', null);
+            INSERT INTO chat (courseID, title, description, group_avatar) VALUES(2, 'Важное', 'Все участники', null);
+            INSERT INTO chat (courseID, title, description, group_avatar) VALUES(2, 'Флудилка', 'Все участники', null);
+            INSERT INTO chat (courseID, title, description, group_avatar) VALUES(2, 'Преподы и ассистенты', 'Прееподы и ассисты', null);
+        </sql>
+    </changeSet>
+    <changeSet id="chat-member-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS chat_member (
+            id SERIAL PRIMARY KEY,
+            chatID INTEGER,
+            userID INTEGER,
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP(0) WITHOUT TIME ZONE NULL,
+            FOREIGN KEY (userID) REFERENCES users(id),
+            FOREIGN KEY (chatID) REFERENCES chat(id)
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="chat-message-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS chat_message (
+            id SERIAL PRIMARY KEY,
+            chatID INTEGER,
+            userID INTEGER,
+            replyTo INTEGER,
+            message TEXT,
+            media_link TEXT NULL,
+            doc_link TEXT NULL,
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP(0) WITHOUT TIME ZONE NULL,
+            FOREIGN KEY (userID) REFERENCES users(id),
+            FOREIGN KEY (chatID) REFERENCES chat(id),
+            FOREIGN KEY (replyTo) REFERENCES users(id)
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="unread-message-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS unread_message (
+            id SERIAL PRIMARY KEY,
+            userID INTEGER,
+            chatID INTEGER,
+            messageID INTEGER,
+            readed BOOLEAN DEFAULT FALSE,
+            FOREIGN KEY (userID) REFERENCES users(id),
+            FOREIGN KEY (chatID) REFERENCES chat(id),
+            FOREIGN KEY (messageID) REFERENCES users(id)
+            )
+        </sql>
+    </changeSet>
+    <changeSet id="post-table-creation" author="dayana">
+        <sql>
+            CREATE TABLE IF NOT EXISTS post (
+            id SERIAL PRIMARY KEY,
+            courseID INTEGER NOT NULL,
+            createdBy INTEGER NOT NULL,
+            updatedBy INTEGER,
+            title VARCHAR(200),
+            content TEXT,
+            media_link TEXT NULL,
+            doc_link TEXT NULL,
+            created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP(0) WITHOUT TIME ZONE NULL,
+            FOREIGN KEY (courseID) REFERENCES course(id),
+            FOREIGN KEY (createdBy) REFERENCES users(id),
+            FOREIGN KEY (updatedBy) REFERENCES users(id)
+            )
+        </sql>
+    </changeSet>
+</databaseChangeLog>
