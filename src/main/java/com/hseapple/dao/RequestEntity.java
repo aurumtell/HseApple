@@ -17,11 +17,11 @@ public class RequestEntity {
         return userID;
     }
 
-    public Long getCourseID() {
+    public Integer getCourseID() {
         return courseID;
     }
 
-    public Long getRoleID() {
+    public Integer getRoleID() {
         return roleID;
     }
 
@@ -45,11 +45,11 @@ public class RequestEntity {
         this.userID = userID;
     }
 
-    public void setCourseID(Long courseID) {
+    public void setCourseID(Integer courseID) {
         this.courseID = courseID;
     }
 
-    public void setRoleID(Long roleID) {
+    public void setRoleID(Integer roleID) {
         this.roleID = roleID;
     }
 
@@ -71,11 +71,11 @@ public class RequestEntity {
 
     @NotNull
     @Column(name = "courseid")
-    private Long courseID;
+    private Integer courseID;
 
     @NotNull
     @Column(name = "roleid")
-    private Long roleID;
+    private Integer roleID;
 
     @NotNull
     @Column(name = "approved")

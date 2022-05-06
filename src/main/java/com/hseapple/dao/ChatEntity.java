@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chat", schema = "public")
@@ -20,7 +21,7 @@ public class ChatEntity {
         this.description = description;
     }
 
-    public void setCourseID(Long courseID) {
+    public void setCourseID(Integer courseID) {
         this.courseID = courseID;
     }
 
@@ -32,7 +33,7 @@ public class ChatEntity {
         this.group_avatar = group_avatar;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -45,7 +46,7 @@ public class ChatEntity {
 
     @NotNull
     @Column(name = "courseid")
-    private Long courseID;
+    private Integer courseID;
 
 //    // убрать
 //    @Column(name = "updatedby")
@@ -57,9 +58,9 @@ public class ChatEntity {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
-    public Long getCourseID() {
+    public Integer getCourseID() {
         return courseID;
     }
 
@@ -71,7 +72,7 @@ public class ChatEntity {
         return group_avatar;
     }
 
-    public Timestamp getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 

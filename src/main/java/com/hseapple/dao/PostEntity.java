@@ -13,7 +13,7 @@ public class PostEntity {
         return id;
     }
 
-    public Long getCourseID() {
+    public Integer getCourseID() {
         return courseID;
     }
 
@@ -55,7 +55,7 @@ public class PostEntity {
 
     @NotNull
     @Column(name = "courseid")
-    private Long courseID;
+    private Integer courseID;
 
     @Column(name = "createdby")
     private Long createdBy;
@@ -79,7 +79,7 @@ public class PostEntity {
         this.id = id;
     }
 
-    public void setCourseID(Long courseID) {
+    public void setCourseID(Integer courseID) {
         this.courseID = courseID;
     }
 

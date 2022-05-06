@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface ProfileDao extends JpaRepository<ProfileEntity, Long> {
 
-    ProfileEntity getByUserID(Long id);
+    Optional<ProfileEntity> getByUserID(Long id);
 }

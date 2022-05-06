@@ -9,10 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface ChatDao extends JpaRepository<ChatEntity, Long> {
-    Optional<ChatEntity> findById(Long courseID);
+//    Optional<ChatEntity> findById(Integer courseID);
 
     @Transactional
     void deleteGroupById(Long id);
 
-    List<ChatEntity> findAllByCourseID(Long courseID);
+    List<ChatEntity> findAllByCourseID(Integer courseID);
 }

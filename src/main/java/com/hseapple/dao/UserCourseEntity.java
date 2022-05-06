@@ -16,11 +16,11 @@ public class UserCourseEntity {
         this.id = id;
     }
 
-    public Long getCourseID() {
+    public Integer getCourseID() {
         return courseID;
     }
 
-    public void setCourseID(Long courseID) {
+    public void setCourseID(Integer courseID) {
         this.courseID = courseID;
     }
 
@@ -32,11 +32,11 @@ public class UserCourseEntity {
         this.userID = userID;
     }
 
-    public Long getRoleID() {
+    public Integer getRoleID() {
         return roleID;
     }
 
-    public void setRoleID(Long roleID) {
+    public void setRoleID(Integer roleID) {
         this.roleID = roleID;
     }
 
@@ -46,7 +46,7 @@ public class UserCourseEntity {
 
     @NotNull
     @Column(name = "courseid")
-    private Long courseID;
+    private Integer courseID;
 
     @NotNull
     @Column(name = "userid")
@@ -54,7 +54,7 @@ public class UserCourseEntity {
 
     @NotNull
     @Column(name = "roleid")
-    private Long roleID;
+    private Integer roleID;
 
 
 

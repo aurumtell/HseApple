@@ -31,16 +31,16 @@ public class PostController {
     @PreAuthorize("hasAnyAuthority('TEACHER', 'STUDENT', 'ASSIST')")
     @RequestMapping(value = "/course/{courseID}/post", method = RequestMethod.GET)
     @ResponseBody
-    public Iterable<PostEntity> getPosts(@PathVariable("courseID") Long courseID, @RequestParam("start") Long start){
+    public Iterable<PostEntity> getPosts(@PathVariable("courseID") Integer courseID, @RequestParam("start") Long start){
         return postService.findAllPosts(courseID, start);
     }
 
     @Operation(summary = "Update post",
             description = "Provides new updated post. Access roles - TEACHER")
-    @PreAuthorize("hasAuthority('TEACHER')")
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ASSIST')")
     @RequestMapping(value = "/course/post/{postID}", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<?> updatePost(@RequestBody PostEntity newPost, @PathVariable Long postID){
+    public PostEntity updatePost(@RequestBody PostEntity newPost, @PathVariable Long postID){
         return postService.updatePost(newPost, postID);
     }
 
@@ -58,8 +58,8 @@ public class PostController {
             description = "Delete post. Access roles - TEACHER")
     @PreAuthorize("hasAuthority('TEACHER')")
     @DeleteMapping(value = "course/post/{postID}")
-    public ResponseEntity<?> deletePost(@PathVariable Long postID) {
-        return postService.deletePost(postID);
+    public void deletePost(@PathVariable Long postID) {
+        postService.deletePost(postID);
     }
 
 }

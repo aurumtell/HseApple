@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 public class CourseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @NotNull
     @Column(name = "title")
@@ -16,7 +16,7 @@ public class CourseEntity {
     @Column(name = "description")
     private String description;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 

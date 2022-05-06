@@ -22,7 +22,7 @@ public class CourseService {
     }
     public List<CourseEntity> findAllCourse() { return courseDao.findAll(); };
 
-    public Iterable<RequestEntity> findAllRequests(Long courseID, Boolean approved) {
+    public Iterable<RequestEntity> findAllRequests(Integer courseID, Boolean approved) {
         return requestDao.findAllByCourseIDAndApproved(courseID, approved);
     }
 }

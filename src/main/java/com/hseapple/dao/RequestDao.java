@@ -10,11 +10,11 @@ import java.util.Optional;
 @Repository
 public interface RequestDao extends JpaRepository<RequestEntity, Long> {
 
-    Iterable<RequestEntity> findAllByCourseID(Long courseID);
+    Iterable<RequestEntity> findAllByCourseID(Integer courseID);
 
-    Optional<RequestEntity> findByUserIDAndCourseID(Long userID, Long courseID);
+    Optional<RequestEntity> findByUserIDAndCourseID(Long userID, Integer courseID);
 
-    Optional<RequestEntity> findAllByUserIDAndCourseID(Long userID, Long courseID);
+    Optional<RequestEntity> findAllByUserIDAndCourseID(Long userID, Integer courseID);
 
-    Iterable<RequestEntity> findAllByCourseIDAndApproved(Long courseID, Boolean approved);
+    Iterable<RequestEntity> findAllByCourseIDAndApproved(Integer courseID, Boolean approved);
 }

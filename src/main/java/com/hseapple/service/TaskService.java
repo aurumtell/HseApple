@@ -1,5 +1,8 @@
 package com.hseapple.service;
 
+import com.hseapple.app.error.ExceptionMapper;
+import com.hseapple.app.error.ExceptionMessage;
+import com.hseapple.app.error.exception.BusinessException;
 import com.hseapple.app.security.UserAndRole;
 import com.hseapple.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,28 +28,21 @@ public class TaskService {
         this.taskDao = taskDao;
     }
 
-    public ResponseEntity<?> deleteTask(Long taskID) {
-        Optional<TaskEntity> task = taskDao.findById(taskID);
-        if (task.isEmpty()){
-            return ResponseEntity.badRequest().body("task not found");
-        }
-        task.ifPresent(t -> {
-            taskDao.deleteTaskById(taskID);
-        });
-        return ResponseEntity.ok("Task deleted");
+    public void deleteTask(Long taskID) {
+        taskDao.findById(taskID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_already_deleted));
+        taskDao.deleteTaskById(taskID);
     }
 
-    public List<TaskEntity> findTasks(Long courseID, Long start) {
+    public List<TaskEntity> findTasks(Integer courseID, Long start) {
         return taskDao.findAllByCourseIDAndIdGreaterThanEqual(courseID, start);
     }
 
-    public Optional<TaskEntity> getTaskForCourse(Long taskID) {
-        return taskDao.findById(taskID);
+    public TaskEntity getTaskForCourse(Long taskID) {
+        return taskDao.findById(taskID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
     }
 
-    public TaskEntity createTask(Long courseID, TaskEntity taskEntity) {
+    public TaskEntity createTask(TaskEntity taskEntity) {
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        taskEntity.setCourseID(courseID);
         taskEntity.setCreatedAt(LocalDateTime.now());
         taskEntity.setCreatedBy(user.getId());
         return taskDao.save(taskEntity);
@@ -58,33 +54,37 @@ public class TaskService {
 
     public UserTaskEntity createAnswer(Long taskID, UserTaskEntity userTaskEntity) {
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserTaskEntity newUserTask = userTaskDao.findByTaskIDAndUserID(taskID, user.getId());
-        newUserTask.setTaskID(taskID);
-        newUserTask.setCreatedAt(LocalDateTime.now());
-        newUserTask.setCreatedBy(user.getId());
-        newUserTask.setAnswer(userTaskEntity.getAnswer());
-        newUserTask.setStatus(true);
+        userTaskEntity.setUserID(user.getId());
+        userTaskEntity.setTaskID(taskID);
+        userTaskEntity.setCreatedAt(LocalDateTime.now());
+        userTaskEntity.setCreatedBy(user.getId());
+        userTaskEntity.setStatus(true);
         return userTaskDao.save(userTaskEntity);
     }
 
-    public ResponseEntity<?> updateTask(TaskEntity newTask, Long taskID) {
-        Optional<TaskEntity> task = taskDao.findById(taskID);
+    public TaskEntity updateTask(TaskEntity newTask, Long taskID) {
+        TaskEntity task = taskDao.findById(taskID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (task.isEmpty()){
-            return ResponseEntity.badRequest().body("task not found");
-        }
-        task.ifPresent(t -> {
-            t.setCourseID(newTask.getCourseID());
-            t.setForm(newTask.getForm());
-            t.setTitle(newTask.getTitle());
-            t.setDescription(newTask.getDescription());
-            t.setTask_content(newTask.getTask_content());
-            t.setDeadline(newTask.getDeadline());
-            t.setStatus(newTask.isStatus());
-            t.setUpdatedAt(LocalDateTime.now());
-            t.setUpdatedBy(user.getId());
-            taskDao.save(t);
-        });
-        return ResponseEntity.ok("Task updated");
+        task.setCourseID(newTask.getCourseID());
+        task.setForm(newTask.getForm());
+        task.setTitle(newTask.getTitle());
+        task.setDescription(newTask.getDescription());
+        task.setTask_content(newTask.getTask_content());
+        task.setDeadline(newTask.getDeadline());
+        task.setStatus(newTask.isStatus());
+        task.setUpdatedAt(LocalDateTime.now());
+        task.setUpdatedBy(user.getId());
+        taskDao.save(task);
+        return task;
+    }
+
+    public UserTaskEntity updateUserTask(UserTaskEntity newUserTask) {
+        UserTaskEntity userTask = userTaskDao.findByTaskIDAndUserID(newUserTask.getTaskID(), newUserTask.getUserID())
+                .orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+        UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        userTask.setScore(newUserTask.getScore());
+        userTask.setUpdatedBy(user.getId());
+        userTask.setUpdatedAt(LocalDateTime.now());
+        return userTask;
     }
 }

@@ -14,14 +14,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class UserAndRole implements UserDetails {
-    String username;
-    String email;
-    Long id;
+    private final String username;
+    private final String email;
+    private Long id;
     List<String> roles = List.of("ADMIN"); //ADMIN, STUDENT
 
-    public UserAndRole(String username, String email){
+    public UserAndRole(String username, String email, Long id){
         this.username = username;
         this.email = email;
+        this.id = id;
     }
 
     public void setId(Long id) {

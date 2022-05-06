@@ -1,5 +1,7 @@
 package com.hseapple.app.security;
 
+import com.hseapple.app.error.exception.TechnicalException;
+import com.hseapple.dao.CourseDao;
 import com.hseapple.dao.UserDao;
 import com.hseapple.dao.UserEntity;
 import com.hseapple.service.UserService;
@@ -33,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,34 +56,30 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
         try {
-            /*
-                String publicKey = "somekey";
-                  Algorithm algorithm = Algorithm.RSA256(publicKey, null); // only the public key is used during verification
-                  JWTVerifier verifier = JWT.require(algorithm)
-                      .withIssuer("auth0")
-                      .build(); //Reusable verifier instance
-            DecodedJWT jwt = verifier.verify(accessToken);
-*/
             DecodedJWT jwt = JWT.decode(accessToken);
             String commonname = jwt.getClaims().get("commonname").asString();
             String email = jwt.getClaims().get("email").asString();
-            UserAndRole userAndRole = new UserAndRole(commonname, email);
-            UserEntity user = userDao.findByEmail(email);
-            if (user == null) {
-                UserEntity newUser = userService.createUser(commonname, email);
-                userAndRole.setId(newUser.getId());
+            if (commonname != null && email != null) {
+                UserEntity user = userService.createUser(commonname, email);
+                UserAndRole userAndRole = new UserAndRole(commonname, email, user.getId());
+//                userAndRole.setId(user.getId());
+//                if (user.isEmpty()) {
+//                    UserEntity newUser = userService.createUser(commonname, email);
+//                    userAndRole.setId(newUser.getId());
+//                } else {
+//                    userAndRole.setId(user.get().getId());
+//                }
+                List<String> roles = userDao.findAllRoleById(userAndRole.getId());
+                List<GrantedAuthority> authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userAndRole, null, authorities);
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                filterChain.doFilter(request, response);
             } else {
-                userAndRole.setId(user.getId());
+                throw new TechnicalException("User is not defined");
             }
-            List<String> roles = userDao.findAllRoleById(userAndRole.getId());
-            List<GrantedAuthority> authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userAndRole, null, authorities);
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            filterChain.doFilter(request, response);
         } catch (JWTDecodeException exception) {
             filterChain.doFilter(request, response);
         }

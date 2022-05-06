@@ -25,7 +25,7 @@ public class TaskEntity {
         return description;
     }
 
-    public Long getCourseID() {
+    public Integer getCourseID() {
         return courseID;
     }
 
@@ -69,7 +69,7 @@ public class TaskEntity {
         this.description = description;
     }
 
-    public void setCourseID(Long courseID) {
+    public void setCourseID(Integer courseID) {
         this.courseID = courseID;
     }
 
@@ -122,9 +122,8 @@ public class TaskEntity {
 
     @NotNull
     @Column(name = "courseid")
-    private Long courseID;
+    private Integer courseID;
 
-    @NotNull
     @Column(name = "createdby")
     private Long createdBy;
 

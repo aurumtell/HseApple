@@ -93,7 +93,6 @@ public class UserTaskEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
     @Column(name = "userid")
     private Long userID;
 

@@ -8,13 +8,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
-
 import javax.validation.Valid;
-import java.util.Optional;
 
 @RestController
 @SecurityRequirement(name = "Authorization")
@@ -31,7 +28,8 @@ public class TaskController {
             description = "Provides task for course")
     @RequestMapping(value = "/task/{taskID}", method = RequestMethod.GET)
     @ResponseBody
-    public Optional<TaskEntity> getTaskForCourse(@PathVariable("taskID") Long taskID){
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'STUDENT', 'ASSIST')")
+    public TaskEntity getTaskForCourse(@PathVariable("taskID") Long taskID){
         return taskService.getTaskForCourse(taskID);
     }
 
@@ -40,7 +38,7 @@ public class TaskController {
     @PreAuthorize("hasAuthority('TEACHER')")
     @RequestMapping(value = "/task/{taskID}", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<?> updateTask(@RequestBody TaskEntity newTask, @PathVariable("taskID") Long taskID){
+    public TaskEntity updateTask(@RequestBody TaskEntity newTask, @PathVariable("taskID") Long taskID){
         return taskService.updateTask(newTask, taskID);
     }
 
@@ -48,25 +46,26 @@ public class TaskController {
             description = "Delete task. Access roles - TEACHER")
     @PreAuthorize("hasAuthority('TEACHER')")
     @DeleteMapping(value = "task/{taskID}")
-    public ResponseEntity<?> deleteTask(@PathVariable Long taskID) {
-        return taskService.deleteTask(taskID);
+    public void deleteTask(@PathVariable Long taskID) {
+         taskService.deleteTask(taskID);
     }
 
     @Operation(summary = "Get tasks for course",
             description = "Provides all available tasks for course")
     @RequestMapping(value = "/course/{courseID}/task", method = RequestMethod.GET)
     @ResponseBody
-    public Iterable<TaskEntity> getTasks(@PathVariable Long courseID, @RequestParam("start") Long start){
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'STUDENT', 'ASSIST')")
+    public Iterable<TaskEntity> getTasks(@PathVariable Integer courseID, @RequestParam("start") Long start){
         return taskService.findTasks(courseID, start);
     }
 
     @Operation(summary = "Create task",
             description = "Creates new task. Access roles - TEACHER")
     @PreAuthorize("hasAuthority('TEACHER')")
-    @RequestMapping(value = "/course/{courseID}/task", method = RequestMethod.POST)
+    @RequestMapping(value = "/course/task", method = RequestMethod.POST)
     @ResponseBody
-    public TaskEntity createTask(@PathVariable Long courseID, @Valid @RequestBody TaskEntity taskEntity) {
-        return taskService.createTask(courseID, taskEntity);
+    public TaskEntity createTask(@Valid @RequestBody TaskEntity taskEntity) {
+        return taskService.createTask(taskEntity);
     }
 
     @Operation(summary = "Get answer tasks",
@@ -90,5 +89,13 @@ public class TaskController {
         return taskService.createAnswer(taskID, userTaskEntity);
     }
 
+    @Operation(summary = "Put a student's grade on a task",
+            description = "Provides new updated user task. Access roles - TEACHER, ASSIST")
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ASSIST')")
+    @RequestMapping(value = "/task/score", method = RequestMethod.PUT)
+    @ResponseBody
+    public UserTaskEntity updateUserTask(@RequestBody UserTaskEntity newUserTask){
+        return taskService.updateUserTask(newUserTask);
+    }
 
 }

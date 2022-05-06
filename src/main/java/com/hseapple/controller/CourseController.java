@@ -39,7 +39,7 @@ public class CourseController {
     @PreAuthorize("hasAuthority('TEACHER')")
     @RequestMapping(value = "/course/{courseID}/application/list", method = RequestMethod.GET)
     @ResponseBody
-    public Iterable<RequestEntity> getListRequests(@PathVariable(name = "courseID") Long courseID, @RequestParam("approved") Boolean approved){
+    public Iterable<RequestEntity> getListRequests(@PathVariable(name = "courseID") Integer courseID, @RequestParam("approved") Boolean approved){
         return courseService.findAllRequests(courseID, approved);
     }
 

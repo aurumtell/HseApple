@@ -1,11 +1,12 @@
 package com.hseapple.service;
 
+import com.hseapple.app.error.ExceptionMessage;
+import com.hseapple.app.error.exception.BusinessException;
 import com.hseapple.app.security.UserAndRole;
 import com.hseapple.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,6 +17,8 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+    private static final Integer ROLE_COUNT = 3;
+
     @Autowired
     ChatService chatService;
 
@@ -26,6 +29,9 @@ public class UserService {
     RequestDao requestDao;
 
     @Autowired
+    CourseDao courseDao;
+
+    @Autowired
     UserCourseDao userCourseDao;
 
     @Autowired
@@ -34,70 +40,72 @@ public class UserService {
     public UserService(UserDao userDao){
         this.userDao = userDao;
     }
-    public Optional<UserEntity> findUser(Long userID) {
-        return userDao.findById(userID);
+    public UserEntity findUser(Long userID) throws UsernameNotFoundException {
+        UserEntity user = userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
+        return user;
     }
 
-    public ResponseEntity<?> changeUser(Long userID, UserEntity newUser) {
-        Optional<UserEntity> user = userDao.findById(userID);
-        if (user.isEmpty()){
-            return ResponseEntity.badRequest().body("user not found");
-        }
-        user.ifPresent(u -> {
-            u.setCommonname(newUser.getCommonname());
-            u.setEmail(newUser.getEmail());
-            userDao.save(u);
-        });
-        return ResponseEntity.ok("User updated");
+    public UserEntity changeUser(Long userID, UserEntity newUser) throws UsernameNotFoundException{
+        UserEntity user = userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
+        user.setCommonname(newUser.getCommonname());
+        user.setEmail(newUser.getEmail());
+        userDao.save(user);
+        return user;
     }
 
     public UserEntity createUser(String commonname, String email) {
+        Optional<UserEntity> user = userDao.findByEmail(email);
+        if (user.isPresent()) {
+            return user.get();
+        }
         UserEntity userEntity = new UserEntity();
         userEntity.setCommonname(commonname);
         userEntity.setEmail(email);
         userEntity.setCreatedAt(LocalDateTime.now());
         userDao.save(userEntity);
+        System.out.println(userEntity.getId());
+        createProfile(userEntity.getId());
         return userEntity;
     }
 
-    public List<UserEntity> getUsers(Long courseID, Long roleID, Boolean approved) {
+    public List<UserEntity> getUsers(Integer courseID, Integer roleID, Boolean approved) {
+        if (courseID > courseDao.count() || roleID > ROLE_COUNT) {
+            throw new BusinessException(ExceptionMessage.INCORRECT_DATA);
+        }
         return userDao.getListOfUsers(courseID, roleID, approved);
     }
 
-    public Optional<RequestEntity> getUserRequest(Long userID, Long courseID) {
-        return requestDao.findByUserIDAndCourseID(userID, courseID);
+    public RequestEntity getUserRequest(Long userID, Integer courseID) {
+        userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
+        courseDao.findById(courseID).orElseThrow(() -> new BusinessException(ExceptionMessage.INCORRECT_DATA));
+
+        return requestDao.findByUserIDAndCourseID(userID, courseID)
+                .orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
     }
 
-    public ResponseEntity<?> updateUserRequest(Long courseID, Long userID, RequestEntity newRequestEntity) {
-        Optional<RequestEntity> request = requestDao.findByUserIDAndCourseID(userID, courseID);
-        System.out.println(request);
+    public RequestEntity updateUserRequest(Integer courseID, Long userID, RequestEntity newRequestEntity) {
+        RequestEntity request = requestDao.findByUserIDAndCourseID(userID, courseID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
         Optional<UserCourseEntity> userCourse = userCourseDao.findByUserIDAndCourseID(userID, courseID);
-        System.out.println("request userCourse");
-        if (request.isEmpty()){
-            return ResponseEntity.badRequest().body("request not found");
-        }
-        request.ifPresent(r -> {
-            r.setApproved(newRequestEntity.getApproved());
-            System.out.println(newRequestEntity.getApproved());
-            if (newRequestEntity.getApproved()) {
-                if (userCourse.isEmpty()){
-                    createUserCourse(courseID, userID, r.getRoleID());
-                } else {
-                    userCourse.ifPresent(u -> u.setRoleID(r.getRoleID()));
-                }
-                if (r.getRoleID() == 1) {
-                    chatService.addMember(userID, courseID);
-                }
+        request.setApproved(newRequestEntity.getApproved());
+        System.out.println(newRequestEntity.getApproved());
+        if (newRequestEntity.getApproved()) {
+            if (userCourse.isEmpty()){
+                createUserCourse(courseID, userID, request.getRoleID());
+            } else {
+                userCourse.ifPresent(u -> u.setRoleID(request.getRoleID()));
             }
-            r.setUpdatedAt(LocalDateTime.now());
-            requestDao.save(r);
-        });
-        return ResponseEntity.ok("Request updated");
+            if (request.getRoleID() == 1) {
+                chatService.addMember(userID, courseID);
+            }
+        }
+        request.setUpdatedAt(LocalDateTime.now());
+        requestDao.save(request);
+        return request;
     }
 
     public Map<String, Object> getProfile(){
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        ProfileEntity profile = userDao.getProfile(user.getId());
+        ProfileEntity profile = userDao.getProfile(user.getId()).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
         Map<String, Object> json = new HashMap<String, Object>();
         json.put("userID", user.getId());
         json.put("avatar", profile.getAvatar());
@@ -106,24 +114,20 @@ public class UserService {
         return json;
     }
 
-    public ResponseEntity<RequestEntity> createRequest(Long courseID, Long roleID) {
+    public RequestEntity createRequest(Integer courseID, Integer roleID) {
         if (roleID > 2) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            throw new BusinessException(ExceptionMessage.ROLE_ERROR);
         }
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (requestDao.findByUserIDAndCourseID(user.getId(), courseID).isEmpty()) {
-            RequestEntity request = new RequestEntity();
-            request.setCourseID(courseID);
-            request.setUserID(user.getId());
-            request.setRoleID(roleID);
-            request.setApproved(false);
-            request.setCreatedAt(LocalDateTime.now());
-            requestDao.save(request);
-            createProfile(user.getId());
-            return new ResponseEntity<>(request, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
-        }
+        requestDao.findByUserIDAndCourseID(user.getId(), courseID).ifPresent(r -> {throw new BusinessException(ExceptionMessage.OBJECT_ALREADY_EXISTS);});
+        RequestEntity request = new RequestEntity();
+        request.setCourseID(courseID);
+        request.setUserID(user.getId());
+        request.setRoleID(roleID);
+        request.setApproved(false);
+        request.setCreatedAt(LocalDateTime.now());
+        requestDao.save(request);
+        return request;
     }
 
     private void createProfile(Long id) {
@@ -133,7 +137,7 @@ public class UserService {
         profileDao.save(profile);
     }
 
-    public void createUserCourse(Long courseID, Long userID, Long roleID) {
+    public void createUserCourse(Integer courseID, Long userID, Integer roleID) {
         UserCourseEntity userCourse = new UserCourseEntity();
         userCourse.setUserID(userID);
         userCourse.setCourseID(courseID);
@@ -141,22 +145,23 @@ public class UserService {
         userCourseDao.save(userCourse);
     }
 
-    public void updateUserCourse(Long courseID, Long userID, Long roleID) {
+    public void updateUserCourse(Integer courseID, Long userID, Integer roleID) {
         Optional<UserCourseEntity> userCourse = userCourseDao.findByUserIDAndCourseID(userID, courseID);
         userCourse.ifPresent(u ->{
             u.setRoleID(roleID);
             userCourseDao.save(u);
         });
-
     }
 
-    public Optional<UserEntity> RegisterUser() {
-        return userDao.findById(((UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId());
+    public UserEntity RegisterUser() {
+        return userDao.findById(((UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId())
+                .orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
     }
 
     public ProfileEntity updateProfile(ProfileEntity profileEntity) {
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        ProfileEntity profile = profileDao.getByUserID(user.getId());
+        ProfileEntity profile = profileDao.getByUserID(user.getId())
+                .orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
         profile.setAvatar(profileEntity.getAvatar());
         profileDao.save(profile);
         return profile;

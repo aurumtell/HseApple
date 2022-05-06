@@ -12,14 +12,14 @@ import java.util.List;
 
 @Repository
 public interface TaskDao extends JpaRepository<TaskEntity, Long> {
-    TaskEntity findByIdAndCourseID(Long taskID, Long courseID);
+    TaskEntity findByIdAndCourseID(Long taskID, Integer courseID);
 
     TaskEntity getTaskById(Long taskID);
 
     @Transactional
     void deleteTaskById(Long id);
 
-    List<TaskEntity> findAllByCourseIDAndStatusAndFormAndCreatedBy(Long courseID, Boolean status, String form, Long createdBy);
+    List<TaskEntity> findAllByCourseIDAndStatusAndFormAndCreatedBy(Integer courseID, Boolean status, String form, Long createdBy);
 
-    List<TaskEntity> findAllByCourseIDAndIdGreaterThanEqual(Long courseID, Long start);
+    List<TaskEntity> findAllByCourseIDAndIdGreaterThanEqual(Integer courseID, Long start);
 }
