@@ -1,6 +1,5 @@
 package com.hseapple.app.error;
 
-import org.slf4j.Logger;
 
 public class ErrorResponse {
     private String error;

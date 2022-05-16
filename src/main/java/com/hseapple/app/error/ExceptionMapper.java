@@ -1,5 +1,6 @@
 package com.hseapple.app.error;
 
+import com.hseapple.app.error.exception.AuthorizationException;
 import com.hseapple.app.error.exception.BusinessException;
 import com.hseapple.app.error.exception.TechnicalException;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,14 @@ public class ExceptionMapper {
             TechnicalException e) {
         log.error("Internal technical error", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new InternalErrorResponse());
+    }
+
+    @ExceptionHandler(value = AuthorizationException.class)
+    protected ResponseEntity<ErrorResponse> handleAuthorizationException(
+            AuthorizationException e) {
+        log.error(e.getMessage(), e);
+        ErrorResponse response = new ErrorResponse(e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
 //    @ExceptionHandler(MethodArgumentNotValidException.class)

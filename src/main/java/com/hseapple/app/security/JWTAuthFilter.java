@@ -1,7 +1,10 @@
 package com.hseapple.app.security;
 
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.JWTVerifier;
+import com.hseapple.app.error.exception.AuthorizationException;
+import com.hseapple.app.error.exception.BusinessException;
 import com.hseapple.app.error.exception.TechnicalException;
-import com.hseapple.dao.CourseDao;
 import com.hseapple.dao.UserDao;
 import com.hseapple.dao.UserEntity;
 import com.hseapple.service.UserService;
@@ -9,33 +12,21 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Service;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.security.interfaces.RSAPublicKey;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,13 +54,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             if (commonname != null && email != null) {
                 UserEntity user = userService.createUser(commonname, email);
                 UserAndRole userAndRole = new UserAndRole(commonname, email, user.getId());
-//                userAndRole.setId(user.getId());
-//                if (user.isEmpty()) {
-//                    UserEntity newUser = userService.createUser(commonname, email);
-//                    userAndRole.setId(newUser.getId());
-//                } else {
-//                    userAndRole.setId(user.get().getId());
-//                }
                 List<String> roles = userDao.findAllRoleById(userAndRole.getId());
                 List<GrantedAuthority> authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -78,7 +62,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 filterChain.doFilter(request, response);
             } else {
-                throw new TechnicalException("User is not defined");
+                throw new AuthorizationException("User is not defined");
             }
         } catch (JWTDecodeException exception) {
             filterChain.doFilter(request, response);

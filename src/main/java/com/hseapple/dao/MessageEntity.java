@@ -59,7 +59,6 @@ public class MessageEntity {
     @Column(name = "replyto")
     private Long replyTo;
 
-    @NotNull
     @Column(name = "message")
     private String message;
 

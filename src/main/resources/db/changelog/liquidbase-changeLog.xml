@@ -199,21 +199,7 @@
             updated_at TIMESTAMP(0) WITHOUT TIME ZONE NULL,
             FOREIGN KEY (userID) REFERENCES users(id),
             FOREIGN KEY (chatID) REFERENCES chat(id),
-            FOREIGN KEY (replyTo) REFERENCES users(id)
-            )
-        </sql>
-    </changeSet>
-    <changeSet id="unread-message-table-creation" author="dayana">
-        <sql>
-            CREATE TABLE IF NOT EXISTS unread_message (
-            id SERIAL PRIMARY KEY,
-            userID INTEGER,
-            chatID INTEGER,
-            messageID INTEGER,
-            readed BOOLEAN DEFAULT FALSE,
-            FOREIGN KEY (userID) REFERENCES users(id),
-            FOREIGN KEY (chatID) REFERENCES chat(id),
-            FOREIGN KEY (messageID) REFERENCES users(id)
+            FOREIGN KEY (replyTo) REFERENCES chat_message(id)
             )
         </sql>
     </changeSet>

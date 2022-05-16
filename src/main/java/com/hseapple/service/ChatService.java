@@ -41,11 +41,6 @@ public class ChatService {
 
     public List<ChatEntity> findAllGroups(Integer courseID) { return chatDao.findAllByCourseID(courseID); }
 
-//    public ChatEntity createGroup(ChatEntity groupEntity) {
-//        groupEntity.setCreatedAt(LocalDateTime.now());
-//        return chatDao.save(groupEntity);
-//    }
-
     public MessageEntity getMessageForChat(Long groupID, Long messageID) {
         return messageDao.findByChatIDAndId(groupID, messageID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
     }

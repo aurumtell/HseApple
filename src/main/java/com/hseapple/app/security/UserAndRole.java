@@ -17,7 +17,7 @@ public class UserAndRole implements UserDetails {
     private final String username;
     private final String email;
     private Long id;
-    List<String> roles = List.of("ADMIN"); //ADMIN, STUDENT
+    List<String> roles;
 
     public UserAndRole(String username, String email, Long id){
         this.username = username;

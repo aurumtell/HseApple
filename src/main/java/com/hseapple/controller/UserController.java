@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -103,7 +102,14 @@ public class UserController {
     @RequestMapping(value = "/auth", method = RequestMethod.GET)
     @ResponseBody
     public UserEntity auth(){
-        return userService.RegisterUser();
+        return userService.registerUser();
     }
 
+    @Operation(summary = "Authorization",
+            description = "Provides user entity")
+    @RequestMapping(value = "/course/{courseID}/role", method = RequestMethod.GET)
+    @ResponseBody
+    public Optional<UserCourseEntity> getRole(@PathVariable("courseID") Integer courseID){
+        return userService.getRole(courseID);
+    }
 }

@@ -106,11 +106,11 @@ public class UserTaskEntity {
     @Column(name = "status")
     private Boolean status;
 
-    @NotNull
+
     @Column(name = "taskid")
     private Long taskID;
 
-    @NotNull
+
     @Column(name = "createdby")
     private Long createdBy;
 

@@ -1,8 +1,6 @@
 package com.hseapple.app.error;
 
 public class ExceptionMessage {
-    public static final String BUSINESS_EXCEPTION_BUNDLE = "business-exception-message";
-
     public static final String object_not_found = "OBJECT NOT FOUND";
 
     public static final String user_not_found = "USER NOT FOUND";

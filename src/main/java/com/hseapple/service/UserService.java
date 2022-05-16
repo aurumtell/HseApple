@@ -20,16 +20,16 @@ public class UserService {
     private static final Integer ROLE_COUNT = 3;
 
     @Autowired
-    ChatService chatService;
+    UserDao userDao;
 
     @Autowired
-    UserDao userDao;
+    CourseDao courseDao;
 
     @Autowired
     RequestDao requestDao;
 
     @Autowired
-    CourseDao courseDao;
+    ChatService chatService;
 
     @Autowired
     UserCourseDao userCourseDao;
@@ -37,12 +37,8 @@ public class UserService {
     @Autowired
     ProfileDao profileDao;
 
-    public UserService(UserDao userDao){
-        this.userDao = userDao;
-    }
     public UserEntity findUser(Long userID) throws UsernameNotFoundException {
-        UserEntity user = userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
-        return user;
+        return userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
     }
 
     public UserEntity changeUser(Long userID, UserEntity newUser) throws UsernameNotFoundException{
@@ -153,7 +149,7 @@ public class UserService {
         });
     }
 
-    public UserEntity RegisterUser() {
+    public UserEntity registerUser() {
         return userDao.findById(((UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId())
                 .orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
     }
@@ -165,5 +161,10 @@ public class UserService {
         profile.setAvatar(profileEntity.getAvatar());
         profileDao.save(profile);
         return profile;
+    }
+
+    public Optional<UserCourseEntity> getRole(Integer courseID) {
+        UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userCourseDao.findByUserIDAndCourseID(user.getId(), courseID);
     }
 }

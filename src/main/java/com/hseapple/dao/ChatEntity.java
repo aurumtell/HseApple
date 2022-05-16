@@ -48,10 +48,6 @@ public class ChatEntity {
     @Column(name = "courseid")
     private Integer courseID;
 
-//    // убрать
-//    @Column(name = "updatedby")
-//    private Long updatedBy;
-
     // убрать ?
     @Column(name = "group_avatar")
     private String group_avatar;
@@ -63,10 +59,6 @@ public class ChatEntity {
     public Integer getCourseID() {
         return courseID;
     }
-
-//    public Long getUpdatedBy() {
-//        return updatedBy;
-//    }
 
     public String getGroup_avatar() {
         return group_avatar;

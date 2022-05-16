@@ -11,8 +11,6 @@ import java.util.List;
 
 @Repository
 public interface PostDao extends JpaRepository<PostEntity, Long> {
-//    List<PostEntity> findAll(Long courseID, PageRequest page);
-    List<PostEntity> findAllByCourseID(Integer courseID, Pageable pageable);
 
     List<PostEntity> findAllByCourseIDAndIdGreaterThanEqual(Integer courseID, Long start);
 
