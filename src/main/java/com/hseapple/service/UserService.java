@@ -38,11 +38,11 @@ public class UserService {
     ProfileDao profileDao;
 
     public UserEntity findUser(Long userID) throws UsernameNotFoundException {
-        return userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
+        return userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.USER_NOT_FOUND));
     }
 
     public UserEntity changeUser(Long userID, UserEntity newUser) throws UsernameNotFoundException{
-        UserEntity user = userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
+        UserEntity user = userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.USER_NOT_FOUND));
         user.setCommonname(newUser.getCommonname());
         user.setEmail(newUser.getEmail());
         userDao.save(user);
@@ -51,6 +51,8 @@ public class UserService {
 
     public UserEntity createUser(String commonname, String email) {
         Optional<UserEntity> user = userDao.findByEmail(email);
+        System.out.println(user);
+        System.out.println(email);
         if (user.isPresent()) {
             return user.get();
         }
@@ -72,15 +74,15 @@ public class UserService {
     }
 
     public RequestEntity getUserRequest(Long userID, Integer courseID) {
-        userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
+        userDao.findById(userID).orElseThrow(() -> new BusinessException(ExceptionMessage.USER_NOT_FOUND));
         courseDao.findById(courseID).orElseThrow(() -> new BusinessException(ExceptionMessage.INCORRECT_DATA));
 
         return requestDao.findByUserIDAndCourseID(userID, courseID)
-                .orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+                .orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
     }
 
     public RequestEntity updateUserRequest(Integer courseID, Long userID, RequestEntity newRequestEntity) {
-        RequestEntity request = requestDao.findByUserIDAndCourseID(userID, courseID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+        RequestEntity request = requestDao.findByUserIDAndCourseID(userID, courseID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
         Optional<UserCourseEntity> userCourse = userCourseDao.findByUserIDAndCourseID(userID, courseID);
         request.setApproved(newRequestEntity.getApproved());
         System.out.println(newRequestEntity.getApproved());
@@ -101,7 +103,7 @@ public class UserService {
 
     public Map<String, Object> getProfile(){
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        ProfileEntity profile = userDao.getProfile(user.getId()).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+        ProfileEntity profile = userDao.getProfile(user.getId()).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
         Map<String, Object> json = new HashMap<String, Object>();
         json.put("userID", user.getId());
         json.put("avatar", profile.getAvatar());
@@ -151,13 +153,13 @@ public class UserService {
 
     public UserEntity registerUser() {
         return userDao.findById(((UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId())
-                .orElseThrow(() -> new BusinessException(ExceptionMessage.user_not_found));
+                .orElseThrow(() -> new BusinessException(ExceptionMessage.USER_NOT_FOUND));
     }
 
     public ProfileEntity updateProfile(ProfileEntity profileEntity) {
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ProfileEntity profile = profileDao.getByUserID(user.getId())
-                .orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+                .orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
         profile.setAvatar(profileEntity.getAvatar());
         profileDao.save(profile);
         return profile;

@@ -1,5 +1,6 @@
 package com.hseapple.dao;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

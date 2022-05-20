@@ -1,19 +1,15 @@
 package com.hseapple.service;
 
-import com.hseapple.app.error.ExceptionMapper;
 import com.hseapple.app.error.ExceptionMessage;
 import com.hseapple.app.error.exception.BusinessException;
 import com.hseapple.app.security.UserAndRole;
 import com.hseapple.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.config.Task;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TaskService {
@@ -29,7 +25,7 @@ public class TaskService {
     }
 
     public void deleteTask(Long taskID) {
-        taskDao.findById(taskID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_already_deleted));
+        taskDao.findById(taskID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_ALREADY_DELETED));
         taskDao.deleteTaskById(taskID);
     }
 
@@ -38,7 +34,7 @@ public class TaskService {
     }
 
     public TaskEntity getTaskForCourse(Long taskID) {
-        return taskDao.findById(taskID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+        return taskDao.findById(taskID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
     }
 
     public TaskEntity createTask(TaskEntity taskEntity) {
@@ -63,7 +59,7 @@ public class TaskService {
     }
 
     public TaskEntity updateTask(TaskEntity newTask, Long taskID) {
-        TaskEntity task = taskDao.findById(taskID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+        TaskEntity task = taskDao.findById(taskID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         task.setCourseID(newTask.getCourseID());
         task.setForm(newTask.getForm());
@@ -80,7 +76,7 @@ public class TaskService {
 
     public UserTaskEntity updateUserTask(UserTaskEntity newUserTask) {
         UserTaskEntity userTask = userTaskDao.findByTaskIDAndUserID(newUserTask.getTaskID(), newUserTask.getUserID())
-                .orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+                .orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         userTask.setScore(newUserTask.getScore());
         userTask.setUpdatedBy(user.getId());

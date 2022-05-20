@@ -5,14 +5,11 @@ import com.hseapple.app.error.exception.BusinessException;
 import com.hseapple.app.security.UserAndRole;
 import com.hseapple.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ChatService {
@@ -31,22 +28,22 @@ public class ChatService {
     }
 
     public ChatEntity getGroupForCourse(Long groupID) {
-        return chatDao.findById(groupID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+        return chatDao.findById(groupID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
     }
 
     public void deleteGroup(Long groupID) {
-        chatDao.findById(groupID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_already_deleted));
+        chatDao.findById(groupID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_ALREADY_DELETED));
         chatDao.deleteGroupById(groupID);
     }
 
     public List<ChatEntity> findAllGroups(Integer courseID) { return chatDao.findAllByCourseID(courseID); }
 
     public MessageEntity getMessageForChat(Long groupID, Long messageID) {
-        return messageDao.findByChatIDAndId(groupID, messageID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+        return messageDao.findByChatIDAndId(groupID, messageID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
     }
 
     public void deleteMessage(Long groupID, Long messageID) {
-        messageDao.findByChatIDAndId(groupID, messageID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_already_deleted));
+        messageDao.findByChatIDAndId(groupID, messageID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_ALREADY_DELETED));
         messageDao.deleteById(messageID);
     }
 
@@ -81,7 +78,7 @@ public class ChatService {
 
     public void deleteMember(Long groupID, Long userID) {
         chatMemberDao.findByChatIDAndUserID(groupID, userID)
-                .orElseThrow(() -> new BusinessException(ExceptionMessage.object_already_deleted));
+                .orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_ALREADY_DELETED));
         chatMemberDao.deleteByChatIDAndUserID(groupID, userID);
     }
 
@@ -90,6 +87,6 @@ public class ChatService {
     }
 
     public UserEntity getMember(Long groupID, Long userID) {
-        return chatMemberDao.findMember(groupID, userID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+        return chatMemberDao.findMember(groupID, userID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
     }
 }

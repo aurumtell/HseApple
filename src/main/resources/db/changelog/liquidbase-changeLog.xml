@@ -23,7 +23,7 @@
             CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
             commonname VARCHAR(225) NOT NULL,
-            email VARCHAR(225) NOT NULL,
+            email VARCHAR(225) NOT NULL UNIQUE,
             created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW()
             )
         </sql>

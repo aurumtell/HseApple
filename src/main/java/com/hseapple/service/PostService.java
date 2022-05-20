@@ -32,7 +32,7 @@ public class PostService {
     }
 
     public PostEntity updatePost(PostEntity newPost, Long postID) {
-        PostEntity post = postDao.findById(postID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_not_found));
+        PostEntity post = postDao.findById(postID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_NOT_FOUND));
         UserAndRole user = (UserAndRole) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         post.setTitle(newPost.getTitle());
         post.setContent(newPost.getContent());
@@ -45,7 +45,7 @@ public class PostService {
     }
 
     public void deletePost(Long postID) {
-        postDao.findById(postID).orElseThrow(() -> new BusinessException(ExceptionMessage.object_already_deleted));
+        postDao.findById(postID).orElseThrow(() -> new BusinessException(ExceptionMessage.OBJECT_ALREADY_DELETED));
         postDao.deleteTaskById(postID);
     }
 

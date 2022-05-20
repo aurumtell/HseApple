@@ -36,20 +36,6 @@ public class ExceptionMapper {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
-//    @ExceptionHandler(MethodArgumentNotValidException.class)
-//    ResponseEntity<ErrorResponse> onMethodArgumentNotValidException(
-//            MethodArgumentNotValidException e) {
-//        log.error("Validation error", e);
-//        final List<Error> errors = new ArrayList<>();
-//        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
-//            errors.add(Error.builder()
-//                    .fieldName(fieldError.getField())
-//                    .message(fieldError.getDefaultMessage())
-//                    .build());
-//        }
-//
-//        return ResponseEntity.badRequest().body(ValidationErrorResponse.builder()
-//                .errors(errors).build());
-//    }
+
 
 }

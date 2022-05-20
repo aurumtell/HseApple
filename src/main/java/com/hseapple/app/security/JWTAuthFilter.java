@@ -1,10 +1,7 @@
 package com.hseapple.app.security;
 
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.JWTVerifier;
 import com.hseapple.app.error.exception.AuthorizationException;
 import com.hseapple.app.error.exception.BusinessException;
-import com.hseapple.app.error.exception.TechnicalException;
 import com.hseapple.dao.UserDao;
 import com.hseapple.dao.UserEntity;
 import com.hseapple.service.UserService;
@@ -52,8 +49,11 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             String commonname = jwt.getClaims().get("commonname").asString();
             String email = jwt.getClaims().get("email").asString();
             if (commonname != null && email != null) {
-                UserEntity user = userService.createUser(commonname, email);
-                UserAndRole userAndRole = new UserAndRole(commonname, email, user.getId());
+                if (userDao.findByEmail(email).isEmpty()) {
+                    System.out.println(commonname + email);
+                    userService.createUser(commonname, email);
+                }
+                UserAndRole userAndRole = new UserAndRole(commonname, email, userDao.findByEmail(email).get().getId());
                 List<String> roles = userDao.findAllRoleById(userAndRole.getId());
                 List<GrantedAuthority> authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

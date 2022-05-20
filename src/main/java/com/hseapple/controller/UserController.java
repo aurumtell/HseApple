@@ -77,7 +77,7 @@ public class UserController {
             description = "Provides user profile.Access role - TEACHER, STUDENT, ASSIST")
     @RequestMapping(value = "/profile", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Object> getProfile() throws JsonProcessingException {
+    public Map<String, Object> getProfile() {
         return userService.getProfile();
     }
 
